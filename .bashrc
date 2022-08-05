@@ -68,30 +68,6 @@ xterm*|rxvt*)
     ;;
 esac
 
-# enable color support of ls and also add handy aliases
-if [ -x /usr/bin/dircolors ]; then
-    test -r ~/.dircolors && eval "$(dircolors -b ~/.dircolors)" || eval "$(dircolors -b)"
-    alias ls='ls --color=auto'
-    #alias dir='dir --color=auto'
-    #alias vdir='vdir --color=auto'
-
-    alias grep='grep --color=auto'
-    alias fgrep='fgrep --color=auto'
-    alias egrep='egrep --color=auto'
-fi
-
-# colored GCC warnings and errors
-#export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01'
-
-# some more ls aliases
-alias ll='ls -alF'
-alias la='ls -A'
-alias l='ls -CF'
-
-# Add an "alert" alias for long running commands.  Use like so:
-#   sleep 10; alert
-alias alert='notify-send --urgency=low -i "$([ $? = 0 ] && echo terminal || echo error)" "$(history|tail -n1|sed -e '\''s/^\s*[0-9]\+\s*//;s/[;&|]\s*alert$//'\'')"'
-
 # Alias definitions.
 # You may want to put all your additions into a separate file like
 # ~/.bash_aliases, instead of adding them here directly.
@@ -121,7 +97,6 @@ USER_IP=`who -u am i 2>/dev/null| awk '{print $NF}'|sed -e 's/[()]//g'`
 export HISTTIMEFORMAT="%F %T  `whoami`@${USER_IP}: "
 export HISTSIZE=-1
 export HISTFILESIZE=-1
-export PROMPT_COMMAND="history -a; history -r;  $PROMPT_COMMAND"
 shopt -s histappend
 
 # >>> conda initialize >>>
@@ -138,51 +113,34 @@ else
 fi
 unset __conda_setup
 # <<< conda initialize <<<
-alias np='notepadqq'
-alias grepp='grep -P'
-export OMP_STACKSIZE=128M
-alias dff=$'df -BG | grepp -v "snap|run|sys|udev|tmpfs" | awk \'{print $6,"\t",$4,"\t/",$2}\''
-alias ddf='vizex -t black -g black --details'
-alias ddu='dutree -d1'
-alias lss='ls -alh'
-alias lls='lss'
-#alias duu='du . -h --max-depth=0'
-alias cp='cp -p'
-alias cdo='cd $OLDPWD'
-#alias tmuxa='tmux attach-session -t'
 
-cdd() {
-        local dir="$1"
-        local dir="${dir:=$HOME}"
-        if [[ -d "$dir" ]]; then
-                cd "$dir" >/dev/null; ls --color=auto
-        else
-                echo "bash: cdls: $dir: Directory not found"
-        fi
+if [ -f "$HOME/.bash-git-prompt/gitprompt.sh" ]; then
+    GIT_PROMPT_ONLY_IN_REPO=1
+    source $HOME/.bash-git-prompt/gitprompt.sh
+fi
+#export PROMPT_COMMAND="history -a; history -r;  $PROMPT_COMMAND"
+
+function multi_shell_share_history {
+
+  if [[ -z "${PROMPT_COMMAND:+x}" ]]; then
+    PROMPT_COMMAND="history -a; history -r"
+  else
+    PROMPT_COMMAND="${PROMPT_COMMAND//$'\n'/;}" # convert all new lines to semi-colons
+    PROMPT_COMMAND="${PROMPT_COMMAND#\;}" # remove leading semi-colon
+    PROMPT_COMMAND="${PROMPT_COMMAND%% }" # remove trailing spaces
+    PROMPT_COMMAND="${PROMPT_COMMAND%\;}" # remove trailing semi-colon
+
+    local new_entry="history -a; history -r"
+    case ";${PROMPT_COMMAND};" in
+      *";${new_entry};"*)
+        # echo "PROMPT_COMMAND already contains: $new_entry"
+        :;;
+      *)
+        PROMPT_COMMAND="${PROMPT_COMMAND};${new_entry}"
+        # echo "PROMPT_COMMAND does not contain: $new_entry"
+        ;;
+    esac
+  fi
+
 }
-
-alias tail1='tail -n 1'
-#alias monisimu="watch -n 10 tail -n 1 `find . -name '*Host*' | xargs ls -tr1 | tail -n 1`"
-
-eval "$(thefuck --alias)"
-
-pyclean () {
-    find . -type f -name '*.py[co]' -delete -o -type d -name __pycache__ -delete
-}
-
-duu() { 
-    if [ $# == 0 ]; then
-        du . -h --max-depth=0 | sort -h
-    else
-        du . -h --max-depth=$1 | sort -h
-    fi
-}
-
-tmuxa() {
-    if [ $# == 0 ]; then
-        tmux a
-    else
-        tmux attach-session -t $1
-    fi
-}
-
+multi_shell_share_history
