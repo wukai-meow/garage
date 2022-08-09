@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import sys
 from subprocess import run
 from glob import glob
 
@@ -41,9 +42,12 @@ while len(to_unzip) != 0:
         output = ''
         while not "Everything is Ok" in ''.join(output):
             if ipwdtry < nsavedpwd:
+                sys.stdout.write("\r")
+                sys.stdout.write(f"Trying password {ipwdtry} / {nsavedpwd}")
+                sys.stdout.flush()
                 pwd = passwords[ipwdtry][:-1]
                 cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
-                print(cmd)
+                # print(cmd)
                 output = get_output(cmd)
                 ipwdtry += 1
             else:
