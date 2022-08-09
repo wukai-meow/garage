@@ -21,12 +21,16 @@ def update_toUnzipList():
     return to_unzip
 
 
-if not os.path.isfile("passwords.txt"):
-    with open("passwords.txt", 'w') as f:
+
+my_dir = os.path.abspath(os.path.dirname(__file__))
+passwordfile = my_dir + "/passwords.txt"
+
+if not os.path.isfile(passwordfile):
+    with open(passwordfile, 'w') as f:
         f.write("\n")
 
 # print(get_output("cat passwords.txt"))
-with open("passwords.txt", 'r') as f:
+with open(passwordfile, 'r') as f:
     passwords = f.readlines()
 
 if not os.path.isdir("extracted"):
@@ -68,7 +72,7 @@ while len(to_unzip) != 0:
 
     to_unzip = update_toUnzipList()
 
-with open("passwords.txt", 'w') as f:
+with open(passwordfile, 'w') as f:
     f.write(''.join(passwords))
 
 print(f"{nExtracted} files extracted.")
