@@ -59,7 +59,7 @@ while len(to_unzip) != 0:
                 break
         if need_new_pwd:
             while not "Everything is Ok" in ''.join(output):
-                pwd = input("Enter password: ")
+                pwd = input("For {fn}, enter password: ")
                 cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
                 print(cmd)
                 output = get_output(cmd)
