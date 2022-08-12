@@ -38,9 +38,11 @@ if not os.path.isdir("extracted"):
 
 nExtracted = 0
 to_unzip = update_toUnzipList()
+total_nToUnzip = 0
 while len(to_unzip) != 0:
+    total_nToUnzip += len(to_unzip)
     for fn in to_unzip:
-        print(fn)
+        print(f"{nExtracted+1}/{total_nToUnzip}\t{fn}")
         nsavedpwd = len(passwords)
         need_new_pwd = False
         ipwdtry = 0
@@ -77,7 +79,7 @@ while len(to_unzip) != 0:
 with open(passwordfile, 'w') as f:
     f.write(''.join(passwords))
 
-print(f"{nExtracted} files extracted.")
+# print(f"{nExtracted} files extracted.")
 
 # print(get_output("cat passwords.txt"))
 
