@@ -79,6 +79,8 @@ while len(to_unzip) != 0:
 with open(passwordfile, 'w') as f:
     f.write(''.join(passwords))
 
+print('\n'.join(get_output("df -h `pwd`")))
+
 # print(f"{nExtracted} files extracted.")
 
 # print(get_output("cat passwords.txt"))
