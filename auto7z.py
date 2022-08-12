@@ -40,6 +40,7 @@ nExtracted = 0
 to_unzip = update_toUnzipList()
 while len(to_unzip) != 0:
     for fn in to_unzip:
+        print(fn)
         nsavedpwd = len(passwords)
         need_new_pwd = False
         ipwdtry = 0
@@ -59,7 +60,7 @@ while len(to_unzip) != 0:
                 break
         if need_new_pwd:
             while not "Everything is Ok" in ''.join(output):
-                pwd = input("For {fn}, enter password: ")
+                pwd = input("Enter password: ")
                 cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
                 print(cmd)
                 output = get_output(cmd)
@@ -69,6 +70,7 @@ while len(to_unzip) != 0:
         if len(os.listdir(os.path.splitext(fn)[0])) < 10:
             get_output(f"mv '{os.path.splitext(fn)[0]}'/* ./ && trash '{os.path.splitext(fn)[0]}'")
         nExtracted += 1
+        print("  Succeeded.")
 
     to_unzip = update_toUnzipList()
 
