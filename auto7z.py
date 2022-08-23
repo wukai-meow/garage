@@ -53,7 +53,7 @@ if __name__ == "__main__":
                 if ipwdtry < nsavedpwd:
                     sys.stdout.write("\r")
                     sys.stdout.write(
-                        f"Trying password {ipwdtry} / {nsavedpwd}")
+                        f"Trying password {ipwdtry+1} / {nsavedpwd}")
                     sys.stdout.flush()
                     pwd = passwords[ipwdtry][:-1]
                     cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
@@ -65,7 +65,7 @@ if __name__ == "__main__":
                     break
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
-                    pwd = input("Enter password: ")
+                    pwd = input("\nEnter password: ")
                     cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     print(cmd)
                     output = get_output(cmd)
