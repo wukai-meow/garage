@@ -25,7 +25,17 @@ def update_toUnzipList():
     return to_unzip
 
 
+def is_7z_exist():
+    if not "Copyright" in "".join(get_output("7z --help")):
+        return False
+    else:
+        return True
+
+
 if __name__ == "__main__":
+    if not is_7z_exist():
+        raise OSError("7z program does not exist.")
+
     my_dir = os.path.abspath(os.path.dirname(__file__))
     passwordfile = my_dir + os.sep + "passwords.txt"
 
