@@ -3,6 +3,8 @@ import os
 import sys
 from subprocess import run
 from glob import glob
+from multiprocessing import Pool
+import signal
 
 
 def get_output(cmd: str, raise_error=False) -> list:
@@ -45,24 +47,42 @@ if __name__ == "__main__":
         total_nToUnzip += len(to_unzip)
         for fn in to_unzip:
             print(f"{nExtracted+1}/{total_nToUnzip}\t{fn}")
-            nsavedpwd = len(passwords)
-            need_new_pwd = False
-            ipwdtry = 0
-            output = ''
-            while not "Everything is Ok" in ''.join(output):
-                if ipwdtry < nsavedpwd:
-                    sys.stdout.write("\r")
+            # 多线程
+            def pool_exit(signum, frame):
+                try:
+                    p.terminate()
+                except:
+                    pass
+                sys.exit(0)
+            signal.signal(signal.SIGTERM, pool_exit)
+            with Pool(processes=5) as p:
+                poolres = []
+                for ipwdtry, pwdp1 in enumerate(passwords):
                     sys.stdout.write(
-                        f"Trying password {ipwdtry+1} / {nsavedpwd}")
+                        f"\rTrying password {ipwdtry+1} / {len(passwords)}")
                     sys.stdout.flush()
-                    pwd = passwords[ipwdtry][:-1]
+                    pwd = pwdp1[:-1]
                     cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
-                    # print(cmd)
-                    output = get_output(cmd)
-                    ipwdtry += 1
-                else:
-                    need_new_pwd = True
-                    break
+                    poolres.append(p.apply_async(get_output, args=(cmd,)))
+                p.close()
+                outputs = [''.join(r.get()) for r in poolres]
+                p.join()
+            need_new_pwd = False if "Everything is Ok" in ''.join(outputs) else True
+            
+            # # 单线程
+            # need_new_pwd = True
+            # for ipwdtry, pwdp1 in enumerate(passwords):
+            #     sys.stdout.write(
+            #         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
+            #     sys.stdout.flush()
+            #     pwd = pwdp1[:-1]
+            #     cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
+            #     # print(cmd)
+            #     output = get_output(cmd)
+            #     if "Everything is Ok" in ''.join(output):
+            #         need_new_pwd = False
+            #         break
+            
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
                     pwd = input("\nEnter password: ")
