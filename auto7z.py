@@ -82,7 +82,7 @@ if __name__ == "__main__":
             #     if "Everything is Ok" in ''.join(output):
             #         need_new_pwd = False
             #         break
-            
+            output = ''
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
                     pwd = input("\nEnter password: ")
