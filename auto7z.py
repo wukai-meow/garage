@@ -41,9 +41,10 @@ if __name__ == "__main__":
         if opt_name in ('-u', '--update'):
             urllib.request.urlretrieve(
                 "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", "auto7z.py")
+            os.chmod("auto7z.py", stat.S_IXUSR)
+            os.chmod("auto7z.py", stat.S_IWUSR)
             os.chmod("auto7z.py", stat.S_IXGRP)
             os.chmod("auto7z.py", stat.S_IXOTH)
-            os.chmod("auto7z.py", stat.S_IXUSR)
             sys.exit(0)
     if not is_7z_exist():
         raise OSError("7z program does not exist.")
