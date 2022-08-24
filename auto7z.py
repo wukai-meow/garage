@@ -1,10 +1,13 @@
 #!/usr/bin/env python3
 import os
 import sys
+import stat
+import signal
+import urllib.request
 from subprocess import run
 from glob import glob
 from multiprocessing import Pool
-import signal
+from getopt import gnu_getopt as getopt
 
 
 def get_output(cmd: str, raise_error=False) -> list:
@@ -33,6 +36,15 @@ def is_7z_exist():
 
 
 if __name__ == "__main__":
+    opts, args = getopt(sys.argv[1:], 'u', ['update',])
+    for opt_name, opt_value in opts:
+        if opt_name in ('-u', '--update'):
+            urllib.request.urlretrieve(
+                "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", "auto7z.py")
+            os.chmod("auto7z.py", stat.S_IXGRP)
+            os.chmod("auto7z.py", stat.S_IXOTH)
+            os.chmod("auto7z.py", stat.S_IXUSR)
+            sys.exit(0)
     if not is_7z_exist():
         raise OSError("7z program does not exist.")
 
@@ -122,6 +134,7 @@ if __name__ == "__main__":
         f.write(''.join(passwords))
 
     print('\n'.join(get_output("df -h `pwd`")))
+
 
     # print(f"{nExtracted} files extracted.")
 
