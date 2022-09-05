@@ -38,7 +38,10 @@ def is_7z_exist():
 
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
-    opts, args = getopt(sys.argv[1:], 'u', ['update',])
+    passwordfile = my_dir + os.sep + "passwords.txt"
+    zip_file_dir = my_dir
+
+    opts, args = getopt(sys.argv[1:], 'ud:', ['update', "dir="])
     for opt_name, opt_value in opts:
         if opt_name in ('-u', '--update'):
             get_output(
@@ -48,10 +51,11 @@ if __name__ == "__main__":
             os.chmod("auto7z.py", 0o755)
             print("Upgraded.")
             sys.exit(0)
+        if opt_name in ('-d', '--dir'):
+            zip_file_dir = opt_value
+
     if not is_7z_exist():
         raise OSError("7z program does not exist.")
-    
-    passwordfile = my_dir + os.sep + "passwords.txt"
 
     if not os.path.isfile(passwordfile):
         with open(passwordfile, 'w', encoding='utf-8') as f:
@@ -61,6 +65,7 @@ if __name__ == "__main__":
     with open(passwordfile, 'r', encoding='utf-8') as f:
        passwords = f.readlines()
 
+    os.chdir(zip_file_dir)
     if not os.path.isdir("extracted"):
        os.mkdir("extracted")
 
@@ -136,7 +141,11 @@ if __name__ == "__main__":
     with open(passwordfile, 'w', encoding='utf-8') as f:
         f.write(''.join(passwords))
 
-    print('\n'.join(get_output("df -h `pwd`")))
+    if os.sep == '/':
+        print('\n'.join(get_output("df -h `pwd`")))
+    else:
+        print('\n'.join(get_output(
+            "Get-Volume -Driveletter " + zip_file_dir.split(":")[0])))
 
     print(f"{nExtracted} files extracted.")
 
