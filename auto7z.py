@@ -50,11 +50,11 @@ if __name__ == "__main__":
     passwordfile = my_dir + os.sep + "passwords.txt"
 
     if not os.path.isfile(passwordfile):
-        with open(passwordfile, 'w') as f:
+        with open(passwordfile, 'w', encoding='utf-8') as f:
            f.write("\n")
 
     # print(get_output("cat passwords.txt"))
-    with open(passwordfile, 'r') as f:
+    with open(passwordfile, 'r', encoding='utf-8') as f:
        passwords = f.readlines()
 
     if not os.path.isdir("extracted"):
@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
         to_unzip = update_toUnzipList()
 
-    with open(passwordfile, 'w') as f:
+    with open(passwordfile, 'w', encoding='utf-8') as f:
         f.write(''.join(passwords))
 
     print('\n'.join(get_output("df -h `pwd`")))
