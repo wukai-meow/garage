@@ -104,7 +104,7 @@ if __name__ == "__main__":
                         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
                     sys.stdout.flush()
                     pwd = pwdp1[:-1]
-                    cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     poolres.append(p.apply_async(get_output, args=(cmd,)))
                 p.close()
                 outputs = [''.join(r.get()) for r in poolres]
@@ -118,7 +118,7 @@ if __name__ == "__main__":
             #         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
             #     sys.stdout.flush()
             #     pwd = pwdp1[:-1]
-            #     cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+            #     cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
             #     # print(cmd)
             #     output = get_output(cmd)
             #     if "Everything is Ok" in ''.join(output):
@@ -128,10 +128,10 @@ if __name__ == "__main__":
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
                     pwd = input("\nEnter password: ")
-                    cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     print(cmd)
                     output = get_output(cmd)
-                    print(output)
+                    print("\n".join(output))
                 passwords.append(pwd + '\n')
             os.rename(fn, "extracted" + os.sep +fn)
 
