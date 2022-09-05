@@ -133,8 +133,7 @@ if __name__ == "__main__":
 
     print('\n'.join(get_output("df -h `pwd`")))
 
-
-    # print(f"{nExtracted} files extracted.")
+    print(f"{nExtracted} files extracted.")
 
     # print(get_output("cat passwords.txt"))
 
