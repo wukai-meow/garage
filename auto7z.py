@@ -19,7 +19,7 @@ def get_output(cmd: str, raise_error=False) -> list:
 
 
 def update_toUnzipList():
-    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz')
+    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001')
     fl = os.listdir()
     to_unzip = []
     for fn in fl:
