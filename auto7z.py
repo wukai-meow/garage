@@ -2,6 +2,7 @@
 import os
 import sys
 import stat
+import shutil
 import signal
 import urllib.request
 from subprocess import run
@@ -39,7 +40,7 @@ def is_7z_exist():
 def move_if_in_sandboxie(zip_file_dir, to_unzip, moveto='F:\\Download\\'):
     if 'sandboxie' in zip_file_dir.lower() or 'defaultbox' in zip_file_dir.lower():
         for fn in to_unzip:
-            os.rename(fn, moveto)
+            shutil.move(fn, moveto)
         os.chdir(moveto)
         zip_file_dir = moveto
         to_unzip = update_toUnzipList()
