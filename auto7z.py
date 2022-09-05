@@ -42,6 +42,7 @@ if __name__ == "__main__":
             urllib.request.urlretrieve(
                 "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", "auto7z.py")
             os.chmod("auto7z.py", 0o755)
+            print("Upgraded.")
             sys.exit(0)
     if not is_7z_exist():
         raise OSError("7z program does not exist.")
