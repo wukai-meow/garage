@@ -36,6 +36,16 @@ def is_7z_exist():
         return True
 
 
+def move_if_in_sandboxie(zip_file_dir, to_unzip, moveto='F:\\Download\\'):
+    if 'sandboxie' in zip_file_dir.lower() or 'defaultbox' in zip_file_dir.lower():
+        for fn in to_unzip:
+            os.rename(fn, moveto)
+        os.chdir(moveto)
+        zip_file_dir = moveto
+        to_unzip = update_toUnzipList()
+    return zip_file_dir, to_unzip
+
+
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
     passwordfile = my_dir + os.sep + "passwords.txt"
@@ -66,12 +76,14 @@ if __name__ == "__main__":
        passwords = f.readlines()
 
     os.chdir(zip_file_dir)
-    if not os.path.isdir("extracted"):
-       os.mkdir("extracted")
 
     nExtracted = 0
     to_unzip = update_toUnzipList()
+    zip_file_dir, to_unzip = move_if_in_sandboxie(zip_file_dir, to_unzip)
     total_nToUnzip = 0
+    if not os.path.isdir("extracted"):
+       os.mkdir("extracted")
+
     while len(to_unzip) != 0:
         total_nToUnzip += len(to_unzip)
         for fn in to_unzip:
