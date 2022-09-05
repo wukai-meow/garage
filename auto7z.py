@@ -23,8 +23,9 @@ def update_toUnzipList():
     fl = os.listdir()
     to_unzip = []
     for fn in fl:
-        if os.path.splitext(fn)[-1][1:] in compress_file_ext:
-            to_unzip.append(fn)
+        if not os.path.isdir(fn):
+            if os.path.splitext(fn)[-1][1:] in compress_file_ext:
+                to_unzip.append(fn)
     return to_unzip
 
 
@@ -36,18 +37,18 @@ def is_7z_exist():
 
 
 if __name__ == "__main__":
+    my_dir = os.path.abspath(os.path.dirname(__file__))
     opts, args = getopt(sys.argv[1:], 'u', ['update',])
     for opt_name, opt_value in opts:
         if opt_name in ('-u', '--update'):
             urllib.request.urlretrieve(
-                "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", "auto7z.py")
+                "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", my_dir+os.sep+"auto7z.py")
             os.chmod("auto7z.py", 0o755)
             print("Upgraded.")
             sys.exit(0)
     if not is_7z_exist():
         raise OSError("7z program does not exist.")
-
-    my_dir = os.path.abspath(os.path.dirname(__file__))
+    
     passwordfile = my_dir + os.sep + "passwords.txt"
 
     if not os.path.isfile(passwordfile):
@@ -83,7 +84,7 @@ if __name__ == "__main__":
                         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
                     sys.stdout.flush()
                     pwd = pwdp1[:-1]
-                    cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     poolres.append(p.apply_async(get_output, args=(cmd,)))
                 p.close()
                 outputs = [''.join(r.get()) for r in poolres]
@@ -97,7 +98,7 @@ if __name__ == "__main__":
             #         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
             #     sys.stdout.flush()
             #     pwd = pwdp1[:-1]
-            #     cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
+            #     cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
             #     # print(cmd)
             #     output = get_output(cmd)
             #     if "Everything is Ok" in ''.join(output):
@@ -107,7 +108,7 @@ if __name__ == "__main__":
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
                     pwd = input("\nEnter password: ")
-                    cmd = f"7z x '{fn}' -p{pwd} -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     print(cmd)
                     output = get_output(cmd)
                 passwords.append(pwd + '\n')
