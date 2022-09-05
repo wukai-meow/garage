@@ -111,6 +111,7 @@ if __name__ == "__main__":
                     cmd = f"7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     print(cmd)
                     output = get_output(cmd)
+                    print(output)
                 passwords.append(pwd + '\n')
             os.rename(fn, "extracted" + os.sep +fn)
 
