@@ -51,6 +51,7 @@ if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
     passwordfile = my_dir + os.sep + "passwords.txt"
     zip_file_dir = my_dir
+    prefix7z = 'wsl ' if os.sep == '\\' else ""
 
     opts, args = getopt(sys.argv[1:], 'ud:', ['update', "dir="])
     for opt_name, opt_value in opts:
@@ -104,31 +105,18 @@ if __name__ == "__main__":
                         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
                     sys.stdout.flush()
                     pwd = pwdp1[:-1]
-                    cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     poolres.append(p.apply_async(get_output, args=(cmd,)))
                 p.close()
                 outputs = [''.join(r.get()) for r in poolres]
                 p.join()
             need_new_pwd = False if "Everything is Ok" in ''.join(outputs) else True
             
-            # # 单线程
-            # need_new_pwd = True
-            # for ipwdtry, pwdp1 in enumerate(passwords):
-            #     sys.stdout.write(
-            #         f"\rTrying password {ipwdtry+1} / {len(passwords)}")
-            #     sys.stdout.flush()
-            #     pwd = pwdp1[:-1]
-            #     cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
-            #     # print(cmd)
-            #     output = get_output(cmd)
-            #     if "Everything is Ok" in ''.join(output):
-            #         need_new_pwd = False
-            #         break
             output = ''
             if need_new_pwd:
                 while not "Everything is Ok" in ''.join(output):
                     pwd = input("\nEnter password: ")
-                    cmd = f"cd {os.getcwd()}; 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                    cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
                     print(cmd)
                     output = get_output(cmd)
                     print("\n".join(output))
