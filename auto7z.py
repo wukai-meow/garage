@@ -20,7 +20,7 @@ def get_output(cmd: str, raise_error=False) -> list:
 
 
 def update_toUnzipList():
-    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001')
+    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016', '017', '018', '019', '020')
     fl = os.listdir()
     to_unzip = []
     for fn in fl:
@@ -90,6 +90,9 @@ if __name__ == "__main__":
         total_nToUnzip += len(to_unzip)
         for fn in to_unzip:
             print(f"{nExtracted+1}/{total_nToUnzip}\t{fn}")
+            if not os.path.isfile(fn):
+                print(f"{fn} was removed.")
+                continue
             # 多线程
             def pool_exit(signum, frame):
                 try:
@@ -121,18 +124,33 @@ if __name__ == "__main__":
                     output = get_output(cmd)
                     print("\n".join(output))
                 passwords.append(pwd + '\n')
-            os.rename(fn, "extracted" + os.sep +fn)
+
+            shutil.move(fn, "extracted" + os.sep +fn)
+            if fn.endswith(".001"):
+                num = 2
+                while True:
+                    tryfile = fn.replace(".001", f'.00{num}')
+                    if tryfile in to_unzip:
+                        shutil.move(tryfile, "extracted" + os.sep + tryfile)
+                    else:
+                        break
 
             nfile = 0
             for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
                 nfile += len(files)
             
             if nfile <= 5:
+                INTERRUPT_MOVE = False
                 for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
                     for _f in files:
-                        os.rename(root_dir + os.sep + _f,
-                                  os.getcwd() + os.sep + _f)
-                    os.rmdir(root_dir)
+                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10:
+                            INTERRUPT_MOVE = True
+                            print(f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
+                            break
+                        shutil.move(root_dir + os.sep + _f,
+                                    os.getcwd() + os.sep + _f)
+                    if not INTERRUPT_MOVE:
+                        os.rmdir(root_dir)
 
             nExtracted += 1
             print("  Succeeded.")
