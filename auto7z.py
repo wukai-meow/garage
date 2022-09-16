@@ -132,6 +132,7 @@ if __name__ == "__main__":
                     tryfile = fn.replace(".001", f'.00{num}')
                     if tryfile in to_unzip:
                         shutil.move(tryfile, "extracted" + os.sep + tryfile)
+                        num += 1
                     else:
                         break
 
