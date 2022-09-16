@@ -143,7 +143,7 @@ if __name__ == "__main__":
                 INTERRUPT_MOVE = False
                 for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
                     for _f in files:
-                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10:
+                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not "萌次元" in _f and not "喵子" in _f:
                             INTERRUPT_MOVE = True
                             print(f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
                             break
