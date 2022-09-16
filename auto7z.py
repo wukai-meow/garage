@@ -138,7 +138,9 @@ if __name__ == "__main__":
 
             nfile = 0
             for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
-                nfile += len(files)
+                for _f in files:
+                    if not "萌次元" in _f and not "喵子" in _f:
+                        nfile += 1
             
             if nfile <= 5:
                 INTERRUPT_MOVE = False
@@ -152,6 +154,12 @@ if __name__ == "__main__":
                                     os.getcwd() + os.sep + _f)
                     if not INTERRUPT_MOVE:
                         os.rmdir(root_dir)
+            else:
+                first_layer_ndirOrFiles = os.listdir(os.path.splitext(fn)[0])
+                if len(first_layer_ndirOrFiles) <= 2:
+                    for ford in first_layer_ndirOrFiles:
+                        shutil.move(os.path.splitext(fn)[0] + os.sep + ford, ford)
+                    os.rmdir(root_dir)
 
             nExtracted += 1
             print("  Succeeded.")
