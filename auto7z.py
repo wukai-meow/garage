@@ -47,6 +47,14 @@ def move_if_in_sandboxie(zip_file_dir, to_unzip, moveto='F:\\Download\\'):
     return zip_file_dir, to_unzip
 
 
+def is_junkfile(filename):
+    filename_keyword_to_exclude = ["萌次元", "科学站", "客户端", "18moe.net", "喵子小屋"]
+    is_junk = False
+    for kwd in filename_keyword_to_exclude:
+        if kwd in filename:
+            is_junk = True
+    return is_junk
+
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
     passwordfile = my_dir + os.sep + "passwords.txt"
@@ -136,22 +144,26 @@ if __name__ == "__main__":
                     else:
                         break
 
+            # 整理文件
             nfile = 0
             for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
                 for _f in files:
-                    if not "萌次元" in _f and not "喵子" in _f:
+                    if is_junkfile(_f):
+                        shutil.move(_f, "extracted" + os.sep + _f)
+                    else:
                         nfile += 1
             
             if nfile <= 5:
                 INTERRUPT_MOVE = False
                 for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
                     for _f in files:
-                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not "萌次元" in _f and not "喵子" in _f:
+                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not is_junkfile(_f):
                             INTERRUPT_MOVE = True
                             print(f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
                             break
-                        shutil.move(root_dir + os.sep + _f,
-                                    os.getcwd() + os.sep + _f)
+                        else:
+                            shutil.move(root_dir + os.sep + _f,
+                                        os.getcwd() + os.sep + _f)
                     if not INTERRUPT_MOVE:
                         os.rmdir(root_dir)
             else:
@@ -159,7 +171,7 @@ if __name__ == "__main__":
                 if len(first_layer_ndirOrFiles) <= 2:
                     for ford in first_layer_ndirOrFiles:
                         shutil.move(os.path.splitext(fn)[0] + os.sep + ford, ford)
-                    os.rmdir(root_dir)
+                    os.rmdir(os.path.splitext(fn)[0])
 
             nExtracted += 1
             print("  Succeeded.")
