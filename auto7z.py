@@ -5,6 +5,7 @@ import stat
 import shutil
 import signal
 import urllib.request
+import traceback
 from subprocess import run
 from glob import glob
 from multiprocessing import Pool
@@ -20,13 +21,15 @@ def get_output(cmd: str, raise_error=False) -> list:
 
 
 def update_toUnzipList():
-    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006', '007', '008', '009', '010', '011', '012', '013', '014', '015', '016', '017', '018', '019', '020')
+    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006',
+                         '007', '008', '009', '010', '011', '012', '013', '014', '015', '016', '017', '018', '019', '020')
     fl = os.listdir()
     to_unzip = []
     for fn in fl:
         if not os.path.isdir(fn):
             if os.path.splitext(fn)[-1][1:] in compress_file_ext:
-                to_unzip.append(fn)
+                if not os.path.isfile(fn+".aria2"):
+                    to_unzip.append(fn)
     return to_unzip
 
 
@@ -47,13 +50,18 @@ def move_if_in_sandboxie(zip_file_dir, to_unzip, moveto='F:\\Download\\'):
     return zip_file_dir, to_unzip
 
 
-def is_junkfile(filename):
-    filename_keyword_to_exclude = ["萌次元", "科学站", "客户端", "18moe.net", "喵子小屋"]
-    is_junk = False
-    for kwd in filename_keyword_to_exclude:
-        if kwd in filename:
-            is_junk = True
-    return is_junk
+def save_passwords(passwordfile: str, passwords: list):
+    with open(passwordfile, 'w', encoding='utf-8') as f:
+        f.write(''.join(passwords))
+
+
+def is_size_zero(dir):
+    size_MB = float(get_output("du " + dir + " --max-depth=0 | awk '{print $1}'")[0]) / 1024 / 1024
+    if size_MB < 1:
+        return True
+    else:
+        return False
+
 
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
@@ -88,6 +96,7 @@ if __name__ == "__main__":
     os.chdir(zip_file_dir)
 
     nExtracted = 0
+    nSkipped = 0
     to_unzip = update_toUnzipList()
     zip_file_dir, to_unzip = move_if_in_sandboxie(zip_file_dir, to_unzip)
     total_nToUnzip = 0
@@ -101,85 +110,122 @@ if __name__ == "__main__":
             if not os.path.isfile(fn):
                 print(f"{fn} was removed.")
                 continue
-            # 多线程
-            def pool_exit(signum, frame):
-                try:
-                    p.terminate()
-                except:
-                    pass
-                sys.exit(0)
-            signal.signal(signal.SIGTERM, pool_exit)
-            with Pool(processes=5) as p:
-                poolres = []
-                for ipwdtry, pwdp1 in enumerate(passwords):
-                    sys.stdout.write(
-                        f"\rTrying password {ipwdtry+1} / {len(passwords)}")
-                    sys.stdout.flush()
-                    pwd = pwdp1[:-1]
-                    cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
-                    poolres.append(p.apply_async(get_output, args=(cmd,)))
-                p.close()
-                outputs = [''.join(r.get()) for r in poolres]
-                p.join()
-            need_new_pwd = False if "Everything is Ok" in ''.join(outputs) else True
-            
+
+            # # 多线程 # 发现有的文件夹没报错但解压完是空的，怀疑是因为有的被失败的覆盖了
+            # def pool_exit(signum, frame):
+            #     try:
+            #         p.terminate()
+            #     except:
+            #         pass
+            #     sys.exit(0)
+            # signal.signal(signal.SIGTERM, pool_exit)
+            # with Pool(processes=1) as p:
+            #     poolres = []
+            #     for ipwdtry, pwdp1 in enumerate(passwords):
+            #         sys.stdout.write(
+            #             f"\rTrying password {ipwdtry+1} / {len(passwords)}")
+            #         sys.stdout.flush()
+            #         pwd = pwdp1[:-1]
+            #         cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+            #         poolres.append(p.apply_async(get_output, args=(cmd,)))
+            #     p.close()
+            #     outputs = [''.join(r.get()) for r in poolres]
+            #     p.join()
+
+            # passwd_hit = '\\'
+            # for iout, output in enumerate(outputs):
+            #     if "Everything is Ok" in output:
+            #         passwd_hit = passwords[iout]
+            #         break
+            # need_new_pwd = False if passwd_hit != '\\' else True
+
+            # 单线程
+            need_new_pwd = True
+            for ipwdtry, pwdp1 in enumerate(passwords):
+                sys.stdout.write(
+                    f"\rTrying password {ipwdtry+1} / {len(passwords)}")
+                sys.stdout.flush()
+                pwd = pwdp1[:-1]
+                cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                output = get_output(cmd)
+                if "Everything is Ok" in ''.join(output):
+                    need_new_pwd = False
+                    passwd_hit = pwd
+                    break
+
             output = ''
+            SKIP = False
             if need_new_pwd:
-                while not "Everything is Ok" in ''.join(output):
-                    pwd = input("\nEnter password: ")
-                    cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
-                    print(cmd)
-                    output = get_output(cmd)
-                    print("\n".join(output))
-                passwords.append(pwd + '\n')
+                try:
+                    while not "Everything is Ok" in ''.join(output):
+                        pwd = input("\nEnter password: ")
+                        cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                        print(cmd)
+                        output = get_output(cmd)
+                        print("\n".join(output))
+                    passwords.append(pwd + '\n')
+                    save_passwords(passwordfile, passwords)
+                except KeyboardInterrupt:
+                    print(f"Skipping {fn}")
+                    SKIP = True
 
-            shutil.move(fn, "extracted" + os.sep +fn)
-            if fn.endswith(".001"):
-                num = 2
-                while True:
-                    tryfile = fn.replace(".001", f'.00{num}')
-                    if tryfile in to_unzip:
-                        shutil.move(tryfile, "extracted" + os.sep + tryfile)
-                        num += 1
-                    else:
-                        break
+            if not SKIP:
+                if is_size_zero(os.path.splitext(fn)[0]):
+                    print(f"Size of extracted {os.path.splitext(fn)[0]} is < 1 MB. Something wrong")
+                SKIP = True
 
-            # 整理文件
-            nfile = 0
-            for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
-                for _f in files:
-                    if is_junkfile(_f):
-                        shutil.move(_f, "extracted" + os.sep + _f)
+
+            if not SKIP:
+                try:
+                    shutil.move(fn, "extracted" + os.sep + fn)
+                    if fn.endswith(".001"):
+                        num = 2
+                        while True:
+                            tryfile = fn.replace(".001", f'.00{num}')
+                            if tryfile in to_unzip:
+                                shutil.move(
+                                    tryfile, "extracted" + os.sep + tryfile)
+                                num += 1
+                            else:
+                                break
+
+                    nfile = 0
+                    for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
+                        for _f in files:
+                            if not "萌次元" in _f and not "喵子" in _f:
+                                nfile += 1
+
+                    if nfile <= 5:
+                        INTERRUPT_MOVE = False
+                        for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
+                            for _f in files:
+                                if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not "萌次元" in _f and not "喵子" in _f:
+                                    INTERRUPT_MOVE = True
+                                    print(
+                                        f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
+                                    break
+                                shutil.move(root_dir + os.sep + _f,
+                                            os.getcwd() + os.sep + _f)
+                            if not INTERRUPT_MOVE:
+                                os.rmdir(root_dir)
                     else:
-                        nfile += 1
-            
-            if nfile <= 5:
-                INTERRUPT_MOVE = False
-                for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
-                    for _f in files:
-                        if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not is_junkfile(_f):
-                            INTERRUPT_MOVE = True
-                            print(f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
-                            break
-                        else:
-                            shutil.move(root_dir + os.sep + _f,
-                                        os.getcwd() + os.sep + _f)
-                    if not INTERRUPT_MOVE:
-                        os.rmdir(root_dir)
+                        first_layer_ndirOrFiles = os.listdir(
+                            os.path.splitext(fn)[0])
+                        if len(first_layer_ndirOrFiles) <= 2:
+                            for ford in first_layer_ndirOrFiles:
+                                shutil.move(os.path.splitext(
+                                    fn)[0] + os.sep + ford, ford)
+                            os.rmdir(root_dir)
+                except Exception as e:
+                    print("Exception during cleaning files:")
+                    print(traceback.format_exc())
+                finally:
+                    nExtracted += 1
+                    print("  Succeeded.")
             else:
-                first_layer_ndirOrFiles = os.listdir(os.path.splitext(fn)[0])
-                if len(first_layer_ndirOrFiles) <= 2:
-                    for ford in first_layer_ndirOrFiles:
-                        shutil.move(os.path.splitext(fn)[0] + os.sep + ford, ford)
-                    os.rmdir(os.path.splitext(fn)[0])
-
-            nExtracted += 1
-            print("  Succeeded.")
+                nSkipped += 1
 
         to_unzip = update_toUnzipList()
-
-    with open(passwordfile, 'w', encoding='utf-8') as f:
-        f.write(''.join(passwords))
 
     if os.sep == '/':
         print('\n'.join(get_output("df -h `pwd`")))
@@ -188,7 +234,7 @@ if __name__ == "__main__":
             "Get-Volume -Driveletter " + zip_file_dir.split(":")[0])))
 
     print(f"{nExtracted} files extracted.")
+    if nSkipped != 0:
+        print(f"{nSkipped} files skipped.")
 
     # print(get_output("cat passwords.txt"))
-
-
