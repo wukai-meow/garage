@@ -62,6 +62,14 @@ def is_size_zero(dir):
     else:
         return False
 
+def is_trash(fn):
+    trash_kwds = ["萌次元", "喵子", "18moe"]
+    isTrash = False
+    for kwd in trash_kwds:
+        if kwd in fn:
+            isTrash = True
+            break
+    return isTrash
 
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
@@ -192,14 +200,14 @@ if __name__ == "__main__":
                     nfile = 0
                     for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
                         for _f in files:
-                            if not "萌次元" in _f and not "喵子" in _f:
+                            if is_trash(_f):
                                 nfile += 1
 
                     if nfile <= 5:
                         INTERRUPT_MOVE = False
                         for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
                             for _f in files:
-                                if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not "萌次元" in _f and not "喵子" in _f:
+                                if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not is_trash(_f):
                                     INTERRUPT_MOVE = True
                                     print(
                                         f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
@@ -207,7 +215,7 @@ if __name__ == "__main__":
                                 shutil.move(root_dir + os.sep + _f,
                                             os.getcwd() + os.sep + _f)
                             if not INTERRUPT_MOVE:
-                                os.rmdir(root_dir)
+                                os.rmdir(os.path.splitext(fn)[0])
                     else:
                         first_layer_ndirOrFiles = os.listdir(
                             os.path.splitext(fn)[0])
