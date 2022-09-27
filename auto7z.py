@@ -56,20 +56,37 @@ def save_passwords(passwordfile: str, passwords: list):
 
 
 def is_size_zero(dir):
-    size_MB = float(get_output("du " + dir + " --max-depth=0 | awk '{print $1}'")[0]) / 1024 / 1024
+    size_MB = float(get_output("du " + dir + " -b --max-depth=0 | awk '{print $1}'")[0]) / 1024 / 1024
     if size_MB < 1:
         return True
     else:
         return False
 
 def is_trash(fn):
-    trash_kwds = ["萌次元", "喵子", "18moe"]
+    trash_kwds = ["萌次元", "喵子", "18moe", "请安装客户端"]
     isTrash = False
     for kwd in trash_kwds:
         if kwd in fn:
             isTrash = True
             break
     return isTrash
+
+
+def get_root_dir_name(zip_file_dir, fn):
+    found = False
+    fnid = 1
+    dirname = fn
+    while not found:
+        if fnid > 1000:
+            raise IOError("找不到合适的文件夹id")
+        fulldir = zip_file_dir+os.sep+dirname
+        if (not os.path.isfile(fulldir)) and (not os.path.isdir(fulldir)):
+            found = True
+        else:
+            fnid += 1
+            dirname = fn + str(fnid)
+    return dirname
+
 
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
@@ -118,6 +135,7 @@ if __name__ == "__main__":
             if not os.path.isfile(fn):
                 print(f"{fn} was removed.")
                 continue
+            destdirname = get_root_dir_name(zip_file_dir, os.path.splitext(fn)[0])
 
             # # 多线程 # 发现有的文件夹没报错但解压完是空的，怀疑是因为有的被失败的覆盖了
             # def pool_exit(signum, frame):
@@ -134,7 +152,7 @@ if __name__ == "__main__":
             #             f"\rTrying password {ipwdtry+1} / {len(passwords)}")
             #         sys.stdout.flush()
             #         pwd = pwdp1[:-1]
-            #         cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+            #         cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{destdirname}'"
             #         poolres.append(p.apply_async(get_output, args=(cmd,)))
             #     p.close()
             #     outputs = [''.join(r.get()) for r in poolres]
@@ -154,7 +172,7 @@ if __name__ == "__main__":
                     f"\rTrying password {ipwdtry+1} / {len(passwords)}")
                 sys.stdout.flush()
                 pwd = pwdp1[:-1]
-                cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{destdirname}'"
                 output = get_output(cmd)
                 if "Everything is Ok" in ''.join(output):
                     need_new_pwd = False
@@ -167,7 +185,7 @@ if __name__ == "__main__":
                 try:
                     while not "Everything is Ok" in ''.join(output):
                         pwd = input("\nEnter password: ")
-                        cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{os.path.splitext(fn)[0]}'"
+                        cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{destdirname}'"
                         print(cmd)
                         output = get_output(cmd)
                         print("\n".join(output))
@@ -178,8 +196,8 @@ if __name__ == "__main__":
                     SKIP = True
 
             if not SKIP:
-                if is_size_zero(os.path.splitext(fn)[0]):
-                    print(f"Size of extracted {os.path.splitext(fn)[0]} is < 1 MB. Something wrong")
+                if is_size_zero(destdirname):
+                    print(f"Size of extracted {destdirname} is < 1 MB. Something wrong")
                     print(f"{passwd_hit=}")
                     SKIP = True
 
@@ -198,14 +216,14 @@ if __name__ == "__main__":
                                 break
 
                     nfile = 0
-                    for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0]):
+                    for root_dir, cur_dir, files in os.walk(destdirname):
                         for _f in files:
                             if is_trash(_f):
                                 nfile += 1
 
                     if nfile <= 5:
                         INTERRUPT_MOVE = False
-                        for root_dir, cur_dir, files in os.walk(os.path.splitext(fn)[0], topdown=False):
+                        for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
                             for _f in files:
                                 if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not is_trash(_f):
                                     INTERRUPT_MOVE = True
@@ -215,10 +233,10 @@ if __name__ == "__main__":
                                 shutil.move(root_dir + os.sep + _f,
                                             os.getcwd() + os.sep + _f)
                             if not INTERRUPT_MOVE:
-                                os.rmdir(os.path.splitext(fn)[0])
+                                os.rmdir(destdirname)
                     else:
                         first_layer_ndirOrFiles = os.listdir(
-                            os.path.splitext(fn)[0])
+                            destdirname)
                         if len(first_layer_ndirOrFiles) <= 2:
                             for ford in first_layer_ndirOrFiles:
                                 shutil.move(os.path.splitext(
