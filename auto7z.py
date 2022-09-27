@@ -98,9 +98,9 @@ if __name__ == "__main__":
     for opt_name, opt_value in opts:
         if opt_name in ('-u', '--update'):
             get_output(
-                f"wget https://github.com/kaiwu-astro/garage/raw/main/auto7z.py -O {my_dir}{os.sep}auto7z.py")
+                f"wget https://github.com/wukai-meow/garage/raw/main/auto7z.py -O {my_dir}{os.sep}auto7z.py")
             urllib.request.urlretrieve(
-                "https://github.com/kaiwu-astro/garage/raw/main/auto7z.py", my_dir+os.sep+"auto7z.py")
+                "https://github.com/wukai-meow/garage/raw/main/auto7z.py", my_dir+os.sep+"auto7z.py")
             os.chmod(my_dir+os.sep+"auto7z.py", 0o755)
             print("Upgraded.")
             sys.exit(0)
