@@ -172,8 +172,8 @@ if __name__ == "__main__":
             if not SKIP:
                 if is_size_zero(os.path.splitext(fn)[0]):
                     print(f"Size of extracted {os.path.splitext(fn)[0]} is < 1 MB. Something wrong")
-                SKIP = True
-
+                    print(f"{passwd_hit=}")
+                    SKIP = True
 
             if not SKIP:
                 try:
