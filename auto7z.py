@@ -136,7 +136,6 @@ if __name__ == "__main__":
                 print(f"{fn} was removed.")
                 continue
             destdirname = get_root_dir_name(zip_file_dir, os.path.splitext(fn)[0])
-            print(destdirname)
 
             # # 多线程 # 发现有的文件夹没报错但解压完是空的，怀疑是因为有的被失败的覆盖了
             # def pool_exit(signum, frame):
@@ -234,7 +233,7 @@ if __name__ == "__main__":
                                 shutil.move(root_dir + os.sep + _f,
                                             os.getcwd() + os.sep + _f)
                             if not INTERRUPT_MOVE:
-                                os.rmdir(destdirname)
+                                shutil.rmtree(destdirname)
                     else:
                         first_layer_ndirOrFiles = os.listdir(
                             destdirname)
