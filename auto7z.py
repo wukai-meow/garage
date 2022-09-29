@@ -43,7 +43,7 @@ def is_7z_exist():
 def move_if_in_sandboxie(zip_file_dir, to_unzip, moveto='F:\\Download\\'):
     if 'sandboxie' in zip_file_dir.lower() or 'defaultbox' in zip_file_dir.lower():
         for fn in to_unzip:
-            shutil.move(fn, moveto + os.sep + fn)
+            move_autorename(fn, moveto + os.sep + fn)
         os.chdir(moveto)
         zip_file_dir = moveto
         to_unzip = update_toUnzipList()
@@ -86,6 +86,18 @@ def get_root_dir_name(zip_file_dir, fn):
             fnid += 1
             dirname = fn + str(fnid)
     return dirname
+
+
+def move_autorename(src, dst):
+    dst_dirname = os.path.dirname(dst)
+    dst_basename = os.path.basename(dst)
+
+    newdst = dst
+    rename_num = 2
+    while os.path.isfile(newdst) or os.path.isdir(newdst):
+        newdst = dst_dirname + os.sep + dst_basename + '_' + str(rename_num)
+        rename_num += 1
+    shutil.move(src, newdst)
 
 
 if __name__ == "__main__":
@@ -203,13 +215,13 @@ if __name__ == "__main__":
 
             if not SKIP:
                 try:
-                    shutil.move(fn, "extracted" + os.sep + fn)
+                    move_autorename(fn, "extracted" + os.sep + fn)
                     if fn.endswith(".001"):
                         num = 2
                         while True:
                             tryfile = fn.replace(".001", f'.00{num}')
                             if tryfile in to_unzip:
-                                shutil.move(
+                                move_autorename(
                                     tryfile, "extracted" + os.sep + tryfile)
                                 num += 1
                             else:
@@ -222,25 +234,17 @@ if __name__ == "__main__":
                                 nfile += 1
 
                     if nfile <= 5:
-                        INTERRUPT_MOVE = False
                         for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
                             for _f in files:
-                                if os.path.isfile(os.getcwd() + os.sep + _f) and os.path.getsize(os.getcwd() + os.sep + _f)/1024/1024 > 10 and not is_trash(_f):
-                                    INTERRUPT_MOVE = True
-                                    print(
-                                        f"Files in extracted {fn} cannot be moved to rootdir. 已存在重名文件. ")
-                                    break
-                                shutil.move(root_dir + os.sep + _f,
-                                            os.getcwd() + os.sep + _f)
-                            if not INTERRUPT_MOVE:
-                                shutil.rmtree(destdirname)
+                                move_autorename(root_dir + os.sep + _f,
+                                                os.getcwd() + os.sep + _f)
+                            shutil.rmtree(destdirname)
                     else:
                         first_layer_ndirOrFiles = os.listdir(
                             destdirname)
                         if len(first_layer_ndirOrFiles) <= 2:
                             for ford in first_layer_ndirOrFiles:
-                                shutil.move(os.path.splitext(
-                                    fn)[0] + os.sep + ford, ford)
+                                move_autorename(os.path.splitext(fn)[0] + os.sep + ford, ford)
                             os.rmdir(root_dir)
                 except Exception as e:
                     print("Exception during cleaning files:")
