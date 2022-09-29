@@ -47,7 +47,8 @@ if __name__ == "__main__":
         if opt_name in ('-d', '--dir'):
             collect_dir = opt_value
 
-    all_files = glob(collect_dir + '/**/*', recursive=True)
+    all_files = glob(collect_dir + '/**/*', recursive=True) # 包括目录名，难以清除
     
     for f_path in all_files:
-        move_autorename(f_path, collect_dir + os.sep + os.path.basename(f_path))
+        if os.path.isfile(f_path):
+            move_autorename(f_path, collect_dir + os.sep + os.path.basename(f_path))
