@@ -91,11 +91,12 @@ def get_root_dir_name(zip_file_dir, fn):
 def move_autorename(src, dst):
     dst_dirname = os.path.dirname(dst)
     dst_basename = os.path.basename(dst)
+    dstfn, dstext = os.path.splitext(dst_basename)
 
     newdst = dst
     rename_num = 2
     while os.path.isfile(newdst) or os.path.isdir(newdst):
-        newdst = dst_dirname + os.sep + dst_basename + '_' + str(rename_num)
+        newdst = dst_dirname + os.sep + dstfn + '_' + str(rename_num) + dstext
         rename_num += 1
     shutil.move(src, newdst)
 
