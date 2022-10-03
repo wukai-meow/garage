@@ -64,8 +64,8 @@ if __name__ == "__main__":
     opts, args = getopt(sys.argv[1:], 'ud:', ['update', "dir="])
     for opt_name, opt_value in opts:
         if opt_name in ('-u', '--update'):
-            get_output(
-                f"wget https://raw.githubusercontent.com/wukai-meow/garage/main/collect.py -O {my_dir}{os.sep}collect.py")
+            print(get_output(
+                f"wget https://raw.githubusercontent.com/wukai-meow/garage/main/collect.py -O {my_dir}{os.sep}collect.py"))
             urllib.request.urlretrieve(
                 "https://raw.githubusercontent.com/wukai-meow/garage/main/collect.py", my_dir+os.sep+"collect.py")
             os.chmod(my_dir+os.sep+"collect.py", 0o755)
