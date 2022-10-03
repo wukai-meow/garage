@@ -21,6 +21,7 @@ def get_output(cmd: str, raise_error=False) -> list:
 
 
 def update_toUnzipList():
+    '''返回相对路径'''
     compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006',
                          '007', '008', '009', '010', '011', '012', '013', '014', '015', '016', '017', '018', '019', '020')
     fl = os.listdir()
@@ -88,17 +89,38 @@ def get_root_dir_name(zip_file_dir, fn):
     return dirname
 
 
-def move_autorename(src, dst):
-    dst_dirname = os.path.dirname(dst)
-    dst_basename = os.path.basename(dst)
-    dstfn, dstext = os.path.splitext(dst_basename)
+def move_autorename(src, dst, collect=False):
+    if collect == False:
+        dst_dirname = os.path.dirname(dst)
+        dst_basename = os.path.basename(dst)
+        dstfn, dstext = os.path.splitext(dst_basename)
 
-    newdst = dst
-    rename_num = 2
-    while os.path.isfile(newdst) or os.path.isdir(newdst):
-        newdst = dst_dirname + os.sep + dstfn + '_' + str(rename_num) + dstext
-        rename_num += 1
-    shutil.move(src, newdst)
+        newdst = dst
+        rename_num = 2
+        while os.path.isfile(newdst) or os.path.isdir(newdst):
+            newdst = dst_dirname + os.sep + dstfn + '_' + str(rename_num) + dstext
+            rename_num += 1
+        shutil.move(src, newdst)
+    elif collect == True:
+        '''
+        ./baidu/1.jpg
+        ./google/1.jpg
+        ->
+        .baidu_1.jpg
+        .google_1.jpg
+        '''
+        if not src.startswith("/"):
+            src_relativepath = src
+        else:
+            src_relativepath = os.path.relpath(src, os.path.dirname(dst))
+        shutil.move(src, os.path.dirname(dst)+'/'+src_relativepath.replace("/", "_"))
+
+
+def remove_empty_folders(path_abs_or_rel):
+    walk = list(os.walk(path_abs_or_rel))
+    for path, _, _ in walk[::-1]:
+        if len(os.listdir(path)) == 0:
+            os.rmdir(path)
 
 
 if __name__ == "__main__":
@@ -238,8 +260,8 @@ if __name__ == "__main__":
                         for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
                             for _f in files:
                                 move_autorename(root_dir + os.sep + _f,
-                                                os.getcwd() + os.sep + _f)
-                            shutil.rmtree(destdirname)
+                                                os.getcwd() + os.sep + _f, collect=True)
+                        remove_empty_folders(destdirname)
                     else:
                         first_layer_ndirOrFiles = os.listdir(
                             destdirname)
