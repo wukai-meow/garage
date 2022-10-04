@@ -57,7 +57,7 @@ def save_passwords(passwordfile: str, passwords: list):
 
 
 def is_size_zero(dir):
-    size_MB = float(get_output("du " + dir + " -b --max-depth=0 | awk '{print $1}'")[0]) / 1024 / 1024
+    size_MB = float(get_output("du '" + dir + "' -b --max-depth=0 | awk '{print $1}'")[0]) / 1024 / 1024
     if size_MB < 1:
         return True
     else:
@@ -166,7 +166,7 @@ if __name__ == "__main__":
     while len(to_unzip) != 0:
         total_nToUnzip += len(to_unzip)
         for fn in to_unzip:
-            print(f"{nExtracted+1}/{total_nToUnzip}\t{fn}")
+            print(f"{nExtracted+nSkipped+1}/{total_nToUnzip}\t{fn}")
             if not os.path.isfile(fn):
                 print(f"{fn} was removed.")
                 continue
@@ -227,7 +227,7 @@ if __name__ == "__main__":
                     passwords.append(pwd + '\n')
                     save_passwords(passwordfile, passwords)
                 except KeyboardInterrupt:
-                    print(f"Skipping {fn}")
+                    print(f"Skip")
                     SKIP = True
 
             if not SKIP:
@@ -250,11 +250,7 @@ if __name__ == "__main__":
                             else:
                                 break
 
-                    nfile = 0
-                    for root_dir, cur_dir, files in os.walk(destdirname):
-                        for _f in files:
-                            if is_trash(_f):
-                                nfile += 1
+                    nfile = len(glob(destdirname+"/**", recursive=True))
 
                     if nfile <= 5:
                         for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
