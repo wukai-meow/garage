@@ -20,10 +20,9 @@ def get_output(cmd: str, raise_error=False) -> list:
     return str(run(cmd, shell=True, check=raise_error, capture_output=True).stdout, encoding='utf-8').split("\n")[:-1]
 
 
-def update_toUnzipList():
+def update_toUnzipList(abandon_list=[]):
     '''返回相对路径'''
-    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006',
-                         '007', '008', '009', '010', '011', '012', '013', '014', '015', '016', '017', '018', '019', '020')
+    compress_file_ext = ('7z', 'zip', 'rar', 'tar.gz', 'tar', 'tgz', '001', '002', '003', '004', '005', '006', '007', '008', '009',)
     fl = os.listdir()
     to_unzip = []
     for fn in fl:
@@ -31,6 +30,7 @@ def update_toUnzipList():
             if os.path.splitext(fn)[-1][1:] in compress_file_ext:
                 if not os.path.isfile(fn+".aria2"):
                     to_unzip.append(fn)
+    to_unzip = [x for x in to_unzip if x not in abandon_list]
     return to_unzip
 
 
@@ -123,6 +123,11 @@ def remove_empty_folders(path_abs_or_rel):
             os.rmdir(path)
 
 
+def is_all_remaining_skipped(skipped_list, to_unzip):
+    # return set(skipped_list) == set(to_unzip)
+    return all(item in skipped_list for item in to_unzip)
+
+
 if __name__ == "__main__":
     my_dir = os.path.abspath(os.path.dirname(__file__))
     passwordfile = my_dir + os.sep + "passwords.txt"
@@ -155,8 +160,10 @@ if __name__ == "__main__":
 
     os.chdir(zip_file_dir)
 
+    # 开始解压
     nExtracted = 0
-    nSkipped = 0
+    skipped_list = []
+    abandon_list = []
     to_unzip = update_toUnzipList()
     zip_file_dir, to_unzip = move_if_in_sandboxie(zip_file_dir, to_unzip)
     total_nToUnzip = 0
@@ -166,7 +173,7 @@ if __name__ == "__main__":
     while len(to_unzip) != 0:
         total_nToUnzip += len(to_unzip)
         for fn in to_unzip:
-            print(f"{nExtracted+nSkipped+1}/{total_nToUnzip}\t{fn}")
+            print(f"{nExtracted+len(skipped_list)+1}/{total_nToUnzip}\t{fn}")
             if not os.path.isfile(fn):
                 print(f"{fn} was removed.")
                 continue
@@ -201,22 +208,27 @@ if __name__ == "__main__":
             # need_new_pwd = False if passwd_hit != '\\' else True
 
             # 单线程
-            need_new_pwd = True
-            for ipwdtry, pwdp1 in enumerate(passwords):
-                sys.stdout.write(
-                    f"\rTrying password {ipwdtry+1} / {len(passwords)}")
-                sys.stdout.flush()
-                pwd = pwdp1[:-1]
-                cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{destdirname}'"
-                output = get_output(cmd)
-                if "Everything is Ok" in ''.join(output):
-                    need_new_pwd = False
-                    passwd_hit = pwd
-                    break
+            SKIP = False if not fn in skipped_list else True
+            if not SKIP:
+                # 正常解压，尝试所有密码
+                need_new_pwd = True
+                for ipwdtry, pwdp1 in enumerate(passwords):
+                    sys.stdout.write(
+                        f"\rTrying password {ipwdtry+1} / {len(passwords)}")
+                    sys.stdout.flush()
+                    pwd = pwdp1[:-1]
+                    cmd = f"cd {os.getcwd()}; {prefix7z} 7z x '{fn}' -p'{pwd}' -r -aoa -o'{destdirname}'"
+                    output = get_output(cmd)
+                    if "Everything is Ok" in ''.join(output):
+                        need_new_pwd = False
+                        passwd_hit = pwd
+                        break
+                if need_new_pwd:
+                    SKIP = True
+                    skipped_list.append(fn)
 
-            output = ''
-            SKIP = False
-            if need_new_pwd:
+            if is_all_remaining_skipped(skipped_list, to_unzip):
+                # 如果只剩最后处理的，就逐一提示新密码
                 try:
                     while not "Everything is Ok" in ''.join(output):
                         pwd = input("\nEnter password: ")
@@ -226,18 +238,25 @@ if __name__ == "__main__":
                         print("\n".join(output))
                     passwords.append(pwd + '\n')
                     save_passwords(passwordfile, passwords)
+                    SKIP = False
                 except KeyboardInterrupt:
-                    print(f"Skip")
+                    # Ctrl+C的直接放弃解压
+                    print(f"Abandon")
+                    abandon_list.append(fn)
                     SKIP = True
 
             if not SKIP:
+                # 解压是否成功，从文件大小再次确认
                 if is_size_zero(destdirname):
                     print(f"Size of extracted {destdirname} is < 1 MB. Something wrong")
                     print(f"{passwd_hit=}")
                     SKIP = True
+                    skipped_list.append(fn)
 
             if not SKIP:
+                # 解压成功，清理文件
                 try:
+                    # 清理原压缩包
                     move_autorename(fn, "extracted" + os.sep + fn)
                     if fn.endswith(".001"):
                         num = 2
@@ -249,9 +268,16 @@ if __name__ == "__main__":
                                 num += 1
                             else:
                                 break
+                    
+                    # 清理解压后的文件
+                    filelist = glob(destdirname+"/**", recursive=True)
+                    for _f in filelist:
+                        if is_trash(_f):
+                            move_autorename(_f, "extracted" + os.sep + os.path.basename(_f))
+                            print(_f, "moved to trash.")
 
-                    nfile = len(glob(destdirname+"/**", recursive=True))
-
+                    filelist = glob(destdirname+"/**", recursive=True)
+                    nfile = len(filelist)
                     if nfile <= 5:
                         for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
                             for _f in files:
@@ -271,10 +297,8 @@ if __name__ == "__main__":
                 finally:
                     nExtracted += 1
                     print("  Succeeded.")
-            else:
-                nSkipped += 1
 
-        to_unzip = update_toUnzipList()
+        to_unzip = update_toUnzipList(abandon_list)
 
     if os.sep == '/':
         print('\n'.join(get_output("df -h `pwd`")))
@@ -283,7 +307,7 @@ if __name__ == "__main__":
             "Get-Volume -Driveletter " + zip_file_dir.split(":")[0])))
 
     print(f"{nExtracted} files extracted.")
-    if nSkipped != 0:
-        print(f"{nSkipped} files skipped.")
+    if len(abandon_list) != 0:
+        print(f"{len(abandon_list)} files not extracted.")
 
     # print(get_output("cat passwords.txt"))
