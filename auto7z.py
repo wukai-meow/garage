@@ -266,13 +266,13 @@ if __name__ == "__main__":
                                 break
                     
                     # 清理解压后的文件
-                    filelist = glob(destdirname+"/**", recursive=True)
+                    filelist = glob(destdirname.replace("[","[[]")+"/**", recursive=True)
                     for _f in filelist:
                         if is_trash(_f):
                             move_autorename(_f, "extracted" + os.sep + os.path.basename(_f))
                             print(_f, "moved to trash.")
 
-                    filelist = glob(destdirname+"/**", recursive=True)
+                    filelist = glob(destdirname.replace("[","[[]")+"/**", recursive=True)
                     nfile = len(filelist)
                     if nfile <= 5:
                         for root_dir, cur_dir, files in os.walk(destdirname, topdown=False):
@@ -285,8 +285,9 @@ if __name__ == "__main__":
                             destdirname)
                         if len(first_layer_ndirOrFiles) <= 2:
                             for ford in first_layer_ndirOrFiles:
-                                move_autorename(os.path.splitext(fn)[0] + os.sep + ford, ford)
-                            os.rmdir(root_dir)
+                                move_autorename(os.path.splitext(fn)[0] + os.sep + ford,
+                                                os.getcwd() + os.sep + ford)
+                            os.rmdir(destdirname)
                 except Exception as e:
                     print("Exception during cleaning files:")
                     print(traceback.format_exc())
