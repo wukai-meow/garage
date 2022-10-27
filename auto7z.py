@@ -66,7 +66,7 @@ def is_size_zero(dir):
 
 def is_trash(fn):
     trash_kwds = ["萌次元", "喵子", "18moe", "请安装客户端"]
-    return any(item in fn for item in trash_kwds)
+    return any(item in fn for item in trash_kwds) and os.path.isfile(fn)
 
 
 def get_root_dir_name(zip_file_dir, fn):
