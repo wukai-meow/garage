@@ -267,8 +267,9 @@ if __name__ == "__main__":
                     
                     # 清理解压后的文件
                     filelist = glob(destdirname.replace("[","[[]")+"/**", recursive=True)
-                    for _f in filelist:
-                        if is_trash(_f):
+                    trashlist = [_f for _f in filelist if is_trash(_f)]
+                    if len(trashlist) <= 10: 
+                        for _f in trashlist:
                             move_autorename(_f, "extracted" + os.sep + os.path.basename(_f))
                             print(_f, "moved to trash.")
 
