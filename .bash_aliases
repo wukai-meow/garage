@@ -1,4 +1,5 @@
 type emulate >/dev/null 2>/dev/null || alias emulate=true
+# sync: add to bashrc: (ping -c 1 bing.com &> /dev/null && wget https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
 
 if [ -f ~/.bash_aliases_local ]; then
     . ~/.bash_aliases_local
