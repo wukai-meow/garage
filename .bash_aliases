@@ -83,7 +83,7 @@ compress() {
     emulate -L ksh
     if [ $# == 1 ]; then
 	src="$1"
-        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > "$src".tar.gz
+        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > "$src".tgz
     elif [ $# == 2 ]; then
         src="$1"
         dst="$2"
@@ -103,7 +103,7 @@ extracttgz() {
     pigz -dc "$1" | tar xf -
 }
 
-alias ipy='ipython'
+alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
 alias rsync='rsync -a --progress'
