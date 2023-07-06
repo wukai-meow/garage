@@ -1,5 +1,8 @@
 type emulate >/dev/null 2>/dev/null || alias emulate=true
-# sync: add to bashrc: (ping -c 1 bing.com &> /dev/null && wget https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
+# sync: 
+# add to bashrc: 
+# (ping -c 1 bing.com &> /dev/null && wget https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
+# (ping -c 1 silk3 &> /dev/null && rsync silk3:~/.bash_aliases ~/ &> /dev/null &) 
 
 if [ -f ~/.bash_aliases_local ]; then
     . ~/.bash_aliases_local
@@ -78,14 +81,26 @@ tmux new-session -s $1
 
 compress() {
     emulate -L ksh
-    src="$1"
-    dst="$2"
-    if [ $# == 2 ]; then
+    if [ $# == 1 ]; then
+	src="$1"
+        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > "$src".tar.gz
+    elif [ $# == 2 ]; then
+        src="$1"
+        dst="$2"
         tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > $dst
-    else
-        nthread="$3"
+    elif [ $# == 3 ]; then
+        nsrc="$1"
+        dst="$2"
+	thread="$3"
         tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
+    else
+	echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
     fi
+}
+
+extracttgz() {
+    emulate -L ksh
+    pigz -dc "$1" | tar xf -
 }
 
 alias ipy='ipython'
