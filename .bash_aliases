@@ -114,3 +114,4 @@ alias viali='vi ~/.bash_aliases'
 alias path='readlink -f'
 alias petarclean='rm data* dump* check* input* *.log log.* hard* spec_* bev.* sev.* *.lst *.mp4 fort.* *.npy stellar_*; for dir in {0..14}; do rm -rf $dir; done'
 alias petarwc='wc -l data.* | sort -t . -k 2n | less'
+alias ':q'=exit
