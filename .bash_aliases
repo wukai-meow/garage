@@ -103,6 +103,16 @@ extracttgz() {
     pigz -dc "$1" | tar xf -
 }
 
+s() {
+  emulate -L ksh
+  sgpt '"'"$*"'"'
+}
+ss() {
+  emulate -L ksh
+  sgpt -s '"'"$*"'"'
+}
+
+
 alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
