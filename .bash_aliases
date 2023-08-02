@@ -67,14 +67,16 @@ duu() {
     fi
 }
 
-tmuxa() {
-    emulate -L ksh
-    if [ $# == 0 ]; then
-        tmux a
-    else
-        tmux attach-session -t $1
-    fi
-}
+#tmuxa() {
+#    emulate -L ksh
+#    if [ $# == 0 ]; then
+#        tmux a
+#    else
+#        tmux attach-session -t $1
+#    fi
+#}
+
+alias tmuxa='tmux attach-session -t'
 
 tmuxn() {
 tmux new-session -s $1
