@@ -289,12 +289,12 @@ if __name__ == "__main__":
                                 move_autorename(os.path.splitext(fn)[0] + os.sep + ford,
                                                 os.getcwd() + os.sep + ford)
                             os.rmdir(destdirname)
+
+                    nExtracted += 1
+                    print("  Succeeded.")
                 except Exception as e:
                     print("Exception during cleaning files:")
                     print(traceback.format_exc())
-                finally:
-                    nExtracted += 1
-                    print("  Succeeded.")
 
         to_unzip = update_toUnzipList(abandon_list)
 
