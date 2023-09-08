@@ -75,17 +75,13 @@ tmuxa() {
         tmux attach-session -t $1
     fi
 }
-
 #alias tmuxa='tmux attach-session -t'
-
-tmuxn() {
-tmux new-session -s $1
-}
+alias tmuxn='tmux new-session -s'
 
 compress() {
     emulate -L ksh
     if [ $# == 1 ]; then
-	src="$1"
+    src="$1"
         tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > "$src".tgz
     elif [ $# == 2 ]; then
         src="$1"
@@ -94,10 +90,10 @@ compress() {
     elif [ $# == 3 ]; then
         nsrc="$1"
         dst="$2"
-	thread="$3"
+        thread="$3"
         tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
     else
-	echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
+        echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
     fi
 }
 
@@ -114,6 +110,10 @@ ss() {
   emulate -L ksh
   sgpt -s '"'"$*"'"'
 }
+path() {
+  emulate -L ksh
+  [ -e "$1" ] && readlink -f "$1"
+}
 
 
 alias ipy='ipython3'
@@ -124,7 +124,6 @@ alias git-reignore="git rm -rf --cached . && git add ."
 alias viba='vi ~/.bashrc'
 alias vibashrc='vi ~/.bashrc'
 alias viali='vi ~/.bash_aliases'
-alias path='readlink -f'
 alias petarclean='rm data* dump* check* input* *.log log.* hard* spec_* bev.* sev.* *.lst *.mp4 fort.* *.npy stellar_*; for dir in {0..14}; do rm -rf $dir; done'
 alias petarwc='wc -l data.* | sort -t . -k 2n | less'
 alias ':q'=exit
