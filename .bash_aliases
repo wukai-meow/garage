@@ -1,6 +1,6 @@
 type emulate >/dev/null 2>/dev/null || alias emulate=true
 # sync: 
-# add to bashrc: 
+# add to ~/.profile: 
 # (ping -c 1 bing.com &> /dev/null && wget https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
 # (ping -c 1 silk3 &> /dev/null && rsync silk3:~/.bash_aliases ~/ &> /dev/null &) 
 
