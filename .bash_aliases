@@ -1,7 +1,7 @@
 type emulate >/dev/null 2>/dev/null || alias emulate=true
 # sync: 
 # add to ~/.profile: 
-# (ping -c 1 bing.com &> /dev/null && wget -q https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
+# (ping -4 -c 1 bing.com &> /dev/null && wget -4 -q https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
 # (ping -c 1 silk3 &> /dev/null && rsync silk3:~/.bash_aliases ~/ &> /dev/null &) 
 
 if [ -f ~/.bash_aliases_local ]; then
@@ -81,7 +81,7 @@ alias tmuxn='tmux new-session -s'
 compress() {
     emulate -L ksh
     if [ $# == 0 ] || [ $# -gt 3 ]; then
-        echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
+        echo "Usage: compress src dst nthread (dst defaults to src.tgz ; nthread defaults to max)"
     fi
     src="$1"
     dst="$src".tgz
