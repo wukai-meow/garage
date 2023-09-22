@@ -80,20 +80,20 @@ alias tmuxn='tmux new-session -s'
 
 compress() {
     emulate -L ksh
-    if [ $# == 1 ]; then
-    src="$1"
-        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 > "$src".tgz
-    elif [ $# == 2 ]; then
-        src="$1"
-        dst="$2"
-        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 > $dst
-    elif [ $# == 3 ]; then
-        nsrc="$1"
-        dst="$2"
-        thread="$3"
-        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
-    else
+    if [ $# == 0 ] || [ $# -gt 3 ]; then
         echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
+    fi
+    src="$1"
+    dst="$src".tgz
+    # nthread = number of total CPU threads
+    nthread=$(  )
+    if [ $# == 2 ]; then dst="$2"; fi
+    if [ $# == 3 ]; then thread="$3"; fi
+
+    if command -v pv >/dev/null 2>&1; then 
+        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
+    else 
+        tar --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
     fi
 }
 
