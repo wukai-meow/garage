@@ -86,7 +86,7 @@ compress() {
     src="$1"
     dst="$src".tgz
     # nthread = number of total CPU threads
-    nthread=$(  )
+    nthread=$(grep -c ^processor /proc/cpuinfo)
     if [ $# == 2 ]; then dst="$2"; fi
     if [ $# == 3 ]; then thread="$3"; fi
 
