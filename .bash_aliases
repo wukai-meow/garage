@@ -82,16 +82,16 @@ compress() {
     emulate -L ksh
     if [ $# == 1 ]; then
     src="$1"
-        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > "$src".tgz
+        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 > "$src".tgz
     elif [ $# == 2 ]; then
         src="$1"
         dst="$2"
-        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 > $dst
+        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 > $dst
     elif [ $# == 3 ]; then
         nsrc="$1"
         dst="$2"
         thread="$3"
-        tar c --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
+        tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
     else
         echo "Usage: compress src dst nthread (dst defaults to src.tar.gz ; nthread defaults to max)"
     fi
