@@ -1,7 +1,7 @@
 type emulate >/dev/null 2>/dev/null || alias emulate=true
 # sync: 
 # add to ~/.profile: 
-# (ping -4 -c 1 bing.com &> /dev/null && wget -4 -q https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases &> /dev/null &) 
+# (ping -4 -c 1 bing.com &> /dev/null && wget -4 -q https://raw.githubusercontent.com/wukai-meow/garage/main/.bash_aliases -O ~/.bash_aliases_new &> /dev/null && mv ~/.bash_aliases_new ~/.bash_aliases &) 
 # (ping -c 1 silk3 &> /dev/null && rsync silk3:~/.bash_aliases ~/ &> /dev/null &) 
 
 if [ -f ~/.bash_aliases_local ]; then
@@ -45,13 +45,13 @@ alias cdo='cd $OLDPWD'
 alias tail1='tail -n 1'
 
 cdd() {
-        local dir="$1"
-        local dir="${dir:=$HOME}"
-        if [[ -d "$dir" ]]; then
-                cd "$dir" >/dev/null; ls --color=auto
-        else
-                echo "bash: cdls: $dir: Directory not found"
-        fi
+    local dir="$1"
+    local dir="${dir:=$HOME}"
+    if [[ -d "$dir" ]]; then
+            cd "$dir" >/dev/null; ls --color=auto
+    else
+            echo "bash: cdls: $dir: Directory not found"
+    fi
 }
 
 pyclean () {
@@ -75,8 +75,9 @@ tmuxa() {
         tmux attach-session -t $1
     fi
 }
-#alias tmuxa='tmux attach-session -t'
+alias tmuxaa='tmux attach-session -t'
 alias tmuxn='tmux new-session -s'
+alias tmuxls='tmux ls'
 
 compress() {
     emulate -L ksh
@@ -93,7 +94,7 @@ compress() {
     if command -v pv >/dev/null 2>&1; then 
         tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
     else 
-        tar --totals --checkpoint-action=echo="#%u: %Т %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
+        tar --totals --checkpoint-action=echo="#%u: %T %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
     fi
 }
 
@@ -103,16 +104,16 @@ extracttgz() {
 }
 
 s() {
-  emulate -L ksh
-  sgpt '"'"$*"'"'
+    emulate -L ksh
+    sgpt '"'"$*"'"'
 }
 ss() {
-  emulate -L ksh
-  sgpt -s '"'"$*"'"'
+    emulate -L ksh
+    sgpt -s '"'"$*"'"'
 }
 path() {
-  emulate -L ksh
-  [ -e "$1" ] && readlink -f "$1"
+    emulate -L ksh
+    [ -e "$1" ] && readlink -f "$1"
 }
 
 
