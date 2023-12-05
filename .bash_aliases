@@ -98,6 +98,7 @@ compress() {
     fi
 }
 
+
 extracttgz() {
     emulate -L ksh
     pigz -dc "$1" | tar xf -
@@ -120,7 +121,7 @@ path() {
 alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
-alias rsync='rsync -a --progress'
+alias rsync='rsync -a --info=progress2'
 alias git-reignore="git rm -rf --cached . && git add ."
 alias viba='vi ~/.bashrc'
 alias vibashrc='vi ~/.bashrc'
