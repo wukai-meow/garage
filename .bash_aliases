@@ -116,6 +116,12 @@ path() {
     emulate -L ksh
     [ -e "$1" ] && readlink -f "$1"
 }
+waitpid(){
+    for pid in "$@" 
+    do
+    	while [ -e /proc/$pid ]; do sleep 1; done
+    done
+}
 
 
 alias ipy='ipython3'
