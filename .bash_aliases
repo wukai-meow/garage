@@ -104,7 +104,7 @@ extracttgz() {
     pigz -dc "$1" | tar xf -
 }
 
-s() {
+sgpt() {
     emulate -L ksh
     sgpt '"'"$*"'"'
 }
