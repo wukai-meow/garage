@@ -124,7 +124,6 @@ waitpid(){
     done
 }
 
-
 alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
@@ -140,4 +139,3 @@ alias petarls="ls | egrep '^data.[0-9]+$' | sort -n -k 1.6"
 alias galevclean='rm spec_out*; rm stellar_magnitude*; rm log_GalevNB*; rm fort.13'
 alias git_update='git fetch --all && git reset --hard origin/dev '
 alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
-
