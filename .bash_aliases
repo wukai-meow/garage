@@ -4,7 +4,7 @@ type emulate >/dev/null 2>/dev/null || alias emulate=true
 # if not working, add source ~/.bash_aliases to ~/.profile
 # inner network machine: (ping -c 1 silk3 &> /dev/null && rsync silk3:~/.kai_config/ ~/ &> /dev/null &) 
 
-(ping -4 -c 1 gitee.com &> /dev/null && for configf in ".bash_aliases" ".vimrc" ".tmux.conf" ".config/htop/htoprc"; do mkdir -p `dirname ~/.kai_config/$configf`; mkdir -p `dirname ~/$configf`; wget -O ~/.kai_config/$configf https://gitee.com/kaiwu-astro/garage/raw/main/linux_config/$configf; cp -p ~/.kai_config/$configf ~/$configf; done &)
+(ping -4 -c 1 gitee.com &> /dev/null && for configf in ".bash_aliases" ".vimrc" ".tmux.conf" ".config/htop/htoprc"; do mkdir -p `dirname ~/.kai_config/$configf`; mkdir -p `dirname ~/$configf`; wget -O ~/.kai_config/$configf https://gitee.com/kaiwu-astro/garage/raw/main/linux_config/$configf &> /dev/null; cp -p ~/.kai_config/$configf ~/$configf; done &)
 
 if [ -f ~/.bash_aliases_local ]; then
     . ~/.bash_aliases_local
