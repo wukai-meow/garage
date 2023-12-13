@@ -1,11 +1,13 @@
 #!/bin/bash
 
-cp -p ~/.bash_aliases "$(dirname "$0")"
-cp -p ~/.vimrc "$(dirname "$0")"
-cp -p ~/.config/htop/htoprc "$(dirname "$0")"
-cp -p ~/.tmux.conf "$(dirname "$0")"
+my_dir="$(dirname "$0")"
+echo $my_dir
 
-cd "$(dirname "$0")"
+cp -p ~/.bash_aliases $my_dir/
+
+rsync -av --progress --files-from=<( printf ".bash_aliases\n.vimrc\n.tmux.conf\n.config/htop/htoprc\n" ) ~/ $my_dir/linux_config/
+
+cd $my_dir
 git add .
 git commit -m "Updated bash_aliases"
 git pull --rebase
