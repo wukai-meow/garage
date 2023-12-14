@@ -12,7 +12,7 @@ set smartcase
 set nu
 set ruler
 set backspace=indent,eol,start
-map Ω :set wrap!<CR>
+map Ω :set wrap!<CR> |" MacOS option+z
 map <C-w> :q<CR>
 map <C-s> :w<CR>
 nnoremap <S-Up> :m-2<CR>
@@ -23,3 +23,4 @@ map <C-e> $
 map <S-z> u
 map <S-Left> B
 map <S-Right> W
+map f w |"MacOS 默认option+左=Esc+f，而vim不支持escape sequence，所以=f，来向左移动一个单词
