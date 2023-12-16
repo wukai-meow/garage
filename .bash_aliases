@@ -126,6 +126,41 @@ waitpid(){
     done
 }
 
+alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
+make_video() {
+    emulate -L ksh
+    # 检查参数数量
+    if [ "$#" -eq 0 ]; then
+        echo "Usage: make_video <output_filename> <codec: h264|h265>"
+        return 1
+    elif [ "$#" -ge 1 ]; then
+        local output_filename="$1"
+    fi
+    local codec='h264'
+    if [ "$#" -eq 2 ]; then
+        local codec="$2"
+    fi
+
+    # 检查编码格式是否为h264或h265
+    if [ "$codec" != "h264" ] && [ "$codec" != "h265" ]; then
+        echo "Invalid codec. Use 'h264' or 'h265'."
+        return 1
+    fi
+
+    # 根据编码格式设置FFmpeg视频编码器和视频标签
+    local encoder
+    local vtag
+    if [ "$codec" == "h264" ]; then
+        encoder="h264_nvenc"
+        vtag="avc1"
+    else
+        encoder="hevc_nvenc"
+        vtag="hvc1"
+    fi
+
+    ffmpeg -hwaccel cuda -r 30 -f concat -safe 0 -i list.txt -b:v 500k -c:v "$encoder" -an -pix_fmt yuv420p -vtag "$vtag" -preset fast -movflags +faststart "$output_filename"
+}
+
 alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
@@ -140,5 +175,4 @@ alias ':q'=exit
 alias petarls="ls | egrep '^data.[0-9]+$' | sort -n -k 1.6"
 alias galevclean='rm spec_out*; rm stellar_magnitude*; rm log_GalevNB*; rm fort.13'
 alias git_update='git fetch --all && git reset --hard origin/dev '
-alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
 alias ks="ssh ks"
