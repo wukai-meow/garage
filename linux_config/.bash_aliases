@@ -178,4 +178,4 @@ alias ':q'=exit
 alias petarls="ls | egrep '^data.[0-9]+$' | sort -n -k 1.6"
 alias galevclean='rm spec_out*; rm stellar_magnitude*; rm log_GalevNB*; rm fort.13'
 alias git_update='git fetch --all && git reset --hard origin/dev '
-alias ks="ssh ks"
+alias cls='clear'
