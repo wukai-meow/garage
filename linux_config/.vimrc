@@ -13,6 +13,7 @@ set nu
 set ruler
 set backspace=indent,eol,start
 map Ω :set wrap!<CR> |" MacOS option+z
+map <C-l> :set nu!<CR>
 map <C-w> :q<CR>
 map <C-s> :w<CR>
 nnoremap <S-Up> :m-2<CR>
