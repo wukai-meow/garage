@@ -129,17 +129,32 @@ waitpid(){
     done
 }
 
-alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
+# alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
+make_ffmpeg_list() {
+    local key=2
+    while getopts k: flag
+    do
+        case "${flag}" in
+            k) key=${OPTARG};;
+        esac
+    done
+    shift $((OPTIND -1))
+
+    sort -t_ -k${key} -n | sed "s/^/file '/" | sed "s/$/'/" > list.txt
+}
 make_video() {
     emulate -L ksh
-    # 检查参数数量
-    if [ "$#" -eq 0 ]; then
+    # if [ "$#" -eq 0 ]; then
+    # if -h or --help is passed as an argument, print usage and return
+    if [ "$#" -eq 1 ] && [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
         echo "Usage: make_video <output_filename> <codec: h264|h265>"
-        return 1
-    elif [ "$#" -ge 1 ]; then
+        return 0
+    fi
+    local output_filename="output.mp4"
+    if [ "$#" -ge 1 ]; then
         local output_filename="$1"
     fi
-    local codec='h264'
+    local codec='h265'
     if [ "$#" -eq 2 ]; then
         local codec="$2"
     fi
