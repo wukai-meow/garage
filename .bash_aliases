@@ -154,7 +154,7 @@ make_video() {
     if [ "$#" -ge 1 ]; then
         local output_filename="$1"
     fi
-    local bitrate="500k"
+    local bitrate="750k"
     if [ "$#" -ge 2 ]; then
         local bitrate="$2"
     fi
