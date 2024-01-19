@@ -147,16 +147,20 @@ make_video() {
     # if [ "$#" -eq 0 ]; then
     # if -h or --help is passed as an argument, print usage and return
     if [ "$#" -eq 1 ] && [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-        echo "Usage: make_video <output_filename> <codec: h264|h265>"
+        echo "Usage: make_video <output_filename> <bitrate> <codec: h264|h265>"
         return 0
     fi
     local output_filename="output.mp4"
     if [ "$#" -ge 1 ]; then
         local output_filename="$1"
     fi
+    local bitrate="500k"
+    if [ "$#" -ge 2 ]; then
+        local bitrate="$2"
+    fi
     local codec='h265'
-    if [ "$#" -eq 2 ]; then
-        local codec="$2"
+    if [ "$#" -ge 3 ]; then
+        local codec="$3"
     fi
 
     # 检查编码格式是否为h264或h265
@@ -176,7 +180,7 @@ make_video() {
         vtag="hvc1"
     fi
 
-    ffmpeg -hwaccel cuda -r 30 -f concat -safe 0 -i list.txt -b:v 500k -c:v "$encoder" -an -pix_fmt yuv420p -vtag "$vtag" -preset fast -movflags +faststart "$output_filename"
+    ffmpeg -hwaccel cuda -r 30 -f concat -safe 0 -i list.txt -b:v "$bitrate" -c:v "$encoder" -an -pix_fmt yuv420p -vtag "$vtag" -preset fast -movflags +faststart "$output_filename"
 }
 
 alias ipy='ipython3'
