@@ -131,17 +131,22 @@ waitpid(){
 hold() {
     emulate -L ksh
     t=0
+    should_exit=false
 
     trap ctrl_c INT
     function ctrl_c() {
         echo ""
+        should_exit=true
     }
 
     while true; do
+        if $should_exit; then
+            break
+        fi
         printf "holding session...%.1f min" "$t"
-        sleep 30
+        sleep 0.6
         printf "\r"
-        t=$(echo "$t + 0.5" | bc)
+        t=$(echo "$t + 0.01" | bc)
     done
 }
 
