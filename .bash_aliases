@@ -128,6 +128,23 @@ waitpid(){
     	while [ -e /proc/$pid ]; do sleep 1; done
     done
 }
+hold() {
+    emulate -L ksh
+    t=0
+
+    trap ctrl_c INT
+    function ctrl_c() {
+        echo ""
+        exit 0
+    }
+
+    while true; do
+        printf "holding session...%.1f min" "$t"
+        sleep 30
+        printf "\r"
+        t=$(echo "$t + 0.5" | bc)
+    done
+}
 
 # alias make_ffmpeg_list="ls -1 *.jpg | sort -t_ -k2 -n | sed \"s/^/file '/\" | sed \"s/$/'/\" > list.txt"
 make_ffmpeg_list() {
