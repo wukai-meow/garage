@@ -135,7 +135,6 @@ hold() {
     trap ctrl_c INT
     function ctrl_c() {
         echo ""
-        exit 0
     }
 
     while true; do
