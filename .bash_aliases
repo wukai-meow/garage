@@ -46,8 +46,8 @@ alias lss='ls -alh'
 alias lls='lss'
 alias cp='cp -p'
 alias cdo='cd $OLDPWD'
-
 alias tail1='tail -n 1'
+alias sl='ls'
 
 cdd() {
     local dir="$1"
