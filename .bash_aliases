@@ -203,6 +203,14 @@ make_video() {
 
     ffmpeg -hwaccel cuda -r 30 -f concat -safe 0 -i list.txt -b:v "$bitrate" -c:v "$encoder" -an -pix_fmt yuv420p -vtag "$vtag" -preset fast -movflags +faststart "$output_filename"
 }
+count_latex(){
+    emulate -L ksh
+    if [ $# == 0 ]; then
+        date >> texcount.log && texcount `find . -name '*.tex' ` | sed -n '/Total/,$p' | tee -a texcount.log | head
+    else
+        texcount `find . -name '*.tex' ` | sed -n '/Total/,$p' | less
+    fi
+}
 
 alias ipy='ipython3'
 alias ipython='ipython3'
