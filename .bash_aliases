@@ -99,7 +99,7 @@ compress() {
     if command -v pv >/dev/null 2>&1; then 
         tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
     else 
-        tar --totals --checkpoint-action=echo="#%u: %T %t" --checkpoint=100000 $src | pigz -6 -p $nthread > $dst
+        tar c $src --totals --checkpoint-action=echo="#%u: %T %t" --checkpoint=100000 | pigz -6 -p $nthread > $dst
     fi
 }
 
