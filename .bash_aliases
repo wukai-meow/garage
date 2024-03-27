@@ -94,7 +94,7 @@ compress() {
     # nthread = number of total CPU threads
     nthread=$(grep -c ^processor /proc/cpuinfo)
     if [ $# == 2 ]; then dst="$2"; fi
-    if [ $# == 3 ]; then thread="$3"; fi
+    if [ $# == 3 ]; then nthread="$3"; fi
 
     if command -v pv >/dev/null 2>&1; then 
         tar c $src | pv -s $(du -sb $src | awk '{print $1}') | pigz -6 -p $nthread > $dst
