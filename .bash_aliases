@@ -215,7 +215,7 @@ count_latex(){
 alias ipy='ipython3'
 alias ipython='ipython3'
 alias python='python3'
-alias rsync='rsync -a --info=progress2'
+alias rsync='rsync -a -h --info=progress2'
 alias git-reignore="git rm -rf --cached . && git add ."
 alias viba='vi ~/.bashrc'
 alias vibashrc='vi ~/.bashrc'
