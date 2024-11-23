@@ -25,3 +25,6 @@ map <S-z> u
 map <S-Left> B
 map <S-Right> W
 map f w |"MacOS 默认option+左=Esc+f，而vim不支持escape sequence，所以=f，来向左移动一个单词
+if &diff
+    colorscheme desert
+endif
